@@ -7,7 +7,7 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL || 'https://taskify-client-delta.vercel.app/',
     methods: 'GET, PUT, POST, DELETE',
     credentials: true,
 }));
