@@ -6,8 +6,23 @@ require('dotenv').config();
 
 const app = express();
 
+// Browsers send the Origin without a trailing slash, so normalise every allowed URL.
+// FRONTEND_URL can hold one URL or a comma-separated list.
+const normalizeOrigin = (url) => url.trim().replace(/\/+$/, '');
+const allowedOrigins = (process.env.FRONTEND_URL || 'https://task-manager-client-murex.vercel.app')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+allowedOrigins.push('http://localhost:5173');
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://taskify-client-delta.vercel.app/',
+    origin: (origin, callback) => {
+        // Allow requests without an Origin header (curl, health checks)
+        if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+            return callback(null, true);
+        }
+        return callback(null, false);
+    },
     methods: 'GET, PUT, POST, DELETE',
     credentials: true,
 }));
@@ -142,7 +157,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
 });
 
 // Start Server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
